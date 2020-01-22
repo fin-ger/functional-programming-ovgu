@@ -1,6 +1,6 @@
 module Main where
 
-import Data.Char (intToDigit)
+import Data.Char (intToDigit, digitToInt)
 import Data.Map (Map)
 import qualified Data.Map as Map
 
@@ -45,6 +45,31 @@ type Item = Either Char Char
 data Line = Line Item Item Item Item Item Item Item Item Item
   deriving Show
 
+convitem index (Left a) = [(index, (digitToInt a))]
+convitem index (Right _) = []
+
+convline l (Line i1 i2 i3 i4 i5 i6 i7 i8 i9) =
+  (convitem (l, 1) i1) ++
+  (convitem (l, 2) i2) ++
+  (convitem (l, 3) i3) ++
+  (convitem (l, 4) i4) ++
+  (convitem (l, 5) i5) ++
+  (convitem (l, 6) i6) ++
+  (convitem (l, 7) i7) ++
+  (convitem (l, 8) i8) ++
+  (convitem (l, 9) i9)
+
+sudoku l1 l2 l3 l4 l5 l6 l7 l8 l9 = Sudoku (Map.fromList (
+  (convline 1 l1) ++
+  (convline 2 l2) ++
+  (convline 3 l3) ++
+  (convline 4 l4) ++
+  (convline 5 l5) ++
+  (convline 6 l6) ++
+  (convline 7 l7) ++
+  (convline 8 l8) ++
+  (convline 9 l9)))
+
 lineParser = do
   many' $ char '|'
   i1 <- eitherP digit (char ' ')
@@ -81,7 +106,7 @@ sudokuParser = do
   many' endOfLine
   l9 <- lineParser
   manyTill anyChar (char '\n')
-  return $ (l1, l2, l3, l4, l5, l6, l7, l8, l9)
+  return $ sudoku l1 l2 l3 l4 l5 l6 l7 l8 l9
 
 main :: IO ()
 main = do
